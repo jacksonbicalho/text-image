@@ -8,7 +8,7 @@
       jquery: [
         'vendor/jquery-3.1.1.min'
       ],
-      text-image: 'controllers/text-image',
+      text-image: 'src/text-image',
     }
   });
 
