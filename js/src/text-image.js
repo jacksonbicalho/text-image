@@ -2,7 +2,10 @@
 ;(function( undefined ) {
   'use strict';
 
-    require([ 'jquery' ], function( $ ) {
+    require([ 'jquery', 'jquery-ui' ], function( $ ) {
+
+        // Variável usada para armazenar o input que estiver ativo na tela
+        var inputAtivo = null;
 
         // Basicamente vai inserir o manipulador dblclick para o quadro #text-image
         // permitindo a criação de inputs para a inserção de textos
@@ -10,6 +13,9 @@
 
         // Registra o manipulador de eventos dblclick para o quadro #text-image
         function onInsertInput(){
+
+            makeText( $("#text-image") );
+
             $("#text-image").on("dblclick", function(evento){
                 addInput(this, evento);
             });
@@ -42,8 +48,8 @@
             // Obtém uma string para ser usada como id e nome do elemento
             var textoId = buildId();
 
-            // Insere o input a criação do texto
-            $('<input/>').attr({
+            // Insere o input a criação do texto, atribuindo-o a variável inputAtivo
+            inputAtivo = $('<input/>').attr({
                 type: 'text',
                 id: 'id_' + textoId,
                 name: textoId,
@@ -53,7 +59,7 @@
                 left: clickX,
                 position: 'absolute',
                 top: clickY
-            }).appendTo(objeto);
+            }).appendTo(objeto).focus();
 
             // Ao pressionar a tecla enter estando no input criado
             $('#id_' + textoId).keypress(function(e) {
@@ -61,10 +67,13 @@
                     OnOff(objeto, "dblclick", onInsertInput)
                 }
             });
+            $('#id_' + textoId).on("focusout", function(e){
+                onInsertInput();
+            });
 
             // // Desabilita o manipulador do evento que insere o input
             // $( "#text-image" ).off("dblclick");
-            OnOff(objeto, evento.type);
+            OnOff(objeto, evento.type, onInsertInput);
         }
 
         // Retorna uma string para ser usada como ID dos elementos
@@ -81,15 +90,49 @@
         // Desabilita ou habilita um evento para um determinado objeto.
         // O parâmetro _function só é invocado quando o o evento não estiver ativo
         //
-        function OnOff(objeto, eventoTipo, _function=[]){
+        function OnOff( objeto, eventoTipo, _function=[] ){
             var ev = $._data(objeto, 'events');
             if(ev && ev[eventoTipo]){
-                $( objeto ).off(eventoTipo);
+                $( objeto ).off( eventoTipo );
             }else{
                 _function();
             }
         }
 
+        // Cria um texto com base no conteúdo digitado na caixa de texto (input)
+        function makeText( objeto ){
+            if(inputAtivo != null){
+
+                var textoId = $(inputAtivo).attr("id");
+                var name = $(inputAtivo).attr("name");
+                var width = $(inputAtivo).width();
+                var height = $(inputAtivo).height();
+                var left = $(inputAtivo).position().left;
+                var top = $(inputAtivo).position().top;
+                var content = $(inputAtivo).val();
+
+                $(inputAtivo).remove();
+
+                if (content !="") {
+                    // Insere uma div
+                    $('<div/>').attr({
+                        id: textoId,
+                        name: name
+                    }).css({
+                        width: width,
+                        height: height,
+                        left: left,
+                        position: 'absolute',
+                        top: top,
+                        display: 'table'
+                    }).text(content)
+                    .draggable( {containment: "parent"} )
+                    .resizable()
+                    .appendTo(objeto);
+                }
+
+            }
+        }
     });
 })();
 
