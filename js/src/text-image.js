@@ -2,137 +2,139 @@
 ;(function( undefined ) {
   'use strict';
 
-    require([ 'jquery', 'jquery-ui' ], function( $ ) {
+    require(['jquery', 'jquery-ui', 'jquery.textImage' ], function( $ ) {
 
-        // Variável usada para armazenar o input que estiver ativo na tela
-        var inputAtivo = null;
+        $("#text-image").textImage();
 
-        // Basicamente vai inserir o manipulador dblclick para o quadro #text-image
-        // permitindo a criação de inputs para a inserção de textos
-        OnOff('#text-image', "dblclick", onInsertInput)
+        // // Variável usada para armazenar o input que estiver ativo na tela
+        // var inputAtivo = null;
 
-        // Registra o manipulador de eventos dblclick para o quadro #text-image
-        function onInsertInput(){
+        // // Basicamente vai inserir o manipulador dblclick para o quadro #text-image
+        // // permitindo a criação de inputs para a inserção de textos
+        // OnOff('#text-image', "dblclick", onInsertInput)
 
-            makeText( $("#text-image") );
+        // // Registra o manipulador de eventos dblclick para o quadro #text-image
+        // function onInsertInput(){
 
-            $("#text-image").on("dblclick", function(evento){
-                addInput(this, evento);
-            });
-        }
+        //     makeText( $("#text-image") );
 
-        // Cria um novo texto dentro do quadro
-        function addInput(objeto, evento) {
+        //     $("#text-image").on("dblclick", function(evento){
+        //         addInput(this, evento);
+        //     });
+        // }
 
-            // Difene uma lçargura padrão para o input de texto
-            var larguraInput = 250;
+        // // Cria um novo texto dentro do quadro
+        // function addInput(objeto, evento) {
 
-            // Define uma altura padrão para o input de texto
-            var alturaInput = 17;
+        //     // Difene uma lçargura padrão para o input de texto
+        //     var larguraInput = 250;
 
-            // Obtém a posição do clique no objeto parent ao clicado
-            var parentOffset = $(objeto).parent().offset();
+        //     // Define uma altura padrão para o input de texto
+        //     var alturaInput = 17;
 
-            // Calcula a posição do clique no quadro
-            var clickX = evento.pageX - parentOffset.left;
-            var clickY = evento.pageY - parentOffset.top;
+        //     // Obtém a posição do clique no objeto parent ao clicado
+        //     var parentOffset = $(objeto).parent().offset();
 
-            // Impõe limites para a criação do input dentro do quadro
-            if ( (clickX + larguraInput) > $(objeto).width() ) {
-                clickX = larguraInput-10
-            }
-            if ( (clickY + alturaInput) > $(objeto).height() ) {
-                clickY = $(objeto).height() - alturaInput - 10
-            }
+        //     // Calcula a posição do clique no quadro
+        //     var clickX = evento.pageX - parentOffset.left;
+        //     var clickY = evento.pageY - parentOffset.top;
 
-            // Obtém uma string para ser usada como id e nome do elemento
-            var textoId = buildId();
+        //     // Impõe limites para a criação do input dentro do quadro
+        //     if ( (clickX + larguraInput) > $(objeto).width() ) {
+        //         clickX = larguraInput-10
+        //     }
+        //     if ( (clickY + alturaInput) > $(objeto).height() ) {
+        //         clickY = $(objeto).height() - alturaInput - 10
+        //     }
 
-            // Insere o input a criação do texto, atribuindo-o a variável inputAtivo
-            inputAtivo = $('<input/>').attr({
-                type: 'text',
-                id: 'id_' + textoId,
-                name: textoId,
-            }).css({
-                width: larguraInput,
-                height: alturaInput,
-                left: clickX,
-                position: 'absolute',
-                top: clickY
-            }).appendTo(objeto).focus();
+        //     // Obtém uma string para ser usada como id e nome do elemento
+        //     var textoId = buildId();
 
-            // Ao pressionar a tecla enter estando no input criado
-            $('#id_' + textoId).keypress(function(e) {
-                if(e.which == 13) {
-                    OnOff(objeto, "dblclick", onInsertInput)
-                }
-            });
-            $('#id_' + textoId).on("focusout", function(e){
-                onInsertInput();
-            });
+        //     // Insere o input a criação do texto, atribuindo-o a variável inputAtivo
+        //     inputAtivo = $('<input/>').attr({
+        //         type: 'text',
+        //         id: 'id_' + textoId,
+        //         name: textoId,
+        //     }).css({
+        //         width: larguraInput,
+        //         height: alturaInput,
+        //         left: clickX,
+        //         position: 'absolute',
+        //         top: clickY
+        //     }).appendTo(objeto).focus();
 
-            // // Desabilita o manipulador do evento que insere o input
-            // $( "#text-image" ).off("dblclick");
-            OnOff(objeto, evento.type, onInsertInput);
-        }
+        //     // Ao pressionar a tecla enter estando no input criado
+        //     $('#id_' + textoId).keypress(function(e) {
+        //         if(e.which == 13) {
+        //             OnOff(objeto, "dblclick", onInsertInput)
+        //         }
+        //     });
+        //     $('#id_' + textoId).on("focusout", function(e){
+        //         onInsertInput();
+        //     });
 
-        // Retorna uma string para ser usada como ID dos elementos
-        function buildId(){
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        //     // // Desabilita o manipulador do evento que insere o input
+        //     // $( "#text-image" ).off("dblclick");
+        //     OnOff(objeto, evento.type, onInsertInput);
+        // }
 
-            for( var i=0; i < 5; i++ )
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
+        // // Retorna uma string para ser usada como ID dos elementos
+        // function buildId(){
+        //     var text = "";
+        //     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-            return text;
-        }
+        //     for( var i=0; i < 5; i++ )
+        //         text += possible.charAt(Math.floor(Math.random() * possible.length));
 
-        // Desabilita ou habilita um evento para um determinado objeto.
-        // O parâmetro _function só é invocado quando o o evento não estiver ativo
-        //
-        function OnOff( objeto, eventoTipo, _function=[] ){
-            var ev = $._data(objeto, 'events');
-            if(ev && ev[eventoTipo]){
-                $( objeto ).off( eventoTipo );
-            }else{
-                _function();
-            }
-        }
+        //     return text;
+        // }
 
-        // Cria um texto com base no conteúdo digitado na caixa de texto (input)
-        function makeText( objeto ){
-            if(inputAtivo != null){
+        // // Desabilita ou habilita um evento para um determinado objeto.
+        // // O parâmetro _function só é invocado quando o o evento não estiver ativo
+        // //
+        // function OnOff( objeto, eventoTipo, _function=[] ){
+        //     var ev = $._data(objeto, 'events');
+        //     if(ev && ev[eventoTipo]){
+        //         $( objeto ).off( eventoTipo );
+        //     }else{
+        //         _function();
+        //     }
+        // }
 
-                var textoId = $(inputAtivo).attr("id");
-                var name = $(inputAtivo).attr("name");
-                var width = $(inputAtivo).width();
-                var height = $(inputAtivo).height();
-                var left = $(inputAtivo).position().left;
-                var top = $(inputAtivo).position().top;
-                var content = $(inputAtivo).val();
+        // // Cria um texto com base no conteúdo digitado na caixa de texto (input)
+        // function makeText( objeto ){
+        //     if(inputAtivo != null){
 
-                $(inputAtivo).remove();
+        //         var textoId = $(inputAtivo).attr("id");
+        //         var name = $(inputAtivo).attr("name");
+        //         var width = $(inputAtivo).width();
+        //         var height = $(inputAtivo).height();
+        //         var left = $(inputAtivo).position().left;
+        //         var top = $(inputAtivo).position().top;
+        //         var content = $(inputAtivo).val();
 
-                if (content !="") {
-                    // Insere uma div
-                    $('<div/>').attr({
-                        id: textoId,
-                        name: name
-                    }).css({
-                        width: width,
-                        height: height,
-                        left: left,
-                        position: 'absolute',
-                        top: top,
-                        display: 'table'
-                    }).text(content)
-                    .draggable( {containment: "parent"} )
-                    .resizable()
-                    .appendTo(objeto);
-                }
+        //         $(inputAtivo).remove();
 
-            }
-        }
+        //         if (content !="") {
+        //             // Insere uma div
+        //             $('<div/>').attr({
+        //                 id: textoId,
+        //                 name: name
+        //             }).css({
+        //                 width: width,
+        //                 height: height,
+        //                 left: left,
+        //                 position: 'absolute',
+        //                 top: top,
+        //                 display: 'table'
+        //             }).text(content)
+        //             .draggable( {containment: "parent"} )
+        //             .resizable()
+        //             .appendTo(objeto);
+        //         }
+
+        //     }
+        // }
     });
 })();
 
