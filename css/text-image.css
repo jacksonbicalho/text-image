@@ -5,3 +5,23 @@
     width: 500px;
     height: 500px;
 }
+
+select#my-select{
+    border: 1px solid #ccc;
+    font-size: 1.5em;
+    padding: 7px;
+}
+
+
+/* Elementos selecionados */
+
+/* Na lista de layers */
+ul#text-image-layers li.selected{
+	background-color: red;
+}
+
+/* No quadro */
+.layer.selected{
+	font-weight: bold;
+	z-index: 1000;
+}
