@@ -119,10 +119,13 @@ Registrando alguns padrões estabelecidos:
             backgroundColor: settings.backgroundColor
         });
 
-        // Registra todos os manipuladores passados em parentElementCallBacks
-        var aPeCb = settings.parentElementCallBacks;
-        for (key in aPeCb) {
-            this.on( key, aPeCb[key] ) ;
+        applyParentElementCallBacks();
+        function applyParentElementCallBacks(){
+            // Registra todos os manipuladores passados em parentElementCallBacks
+            var aPeCb = settings.parentElementCallBacks;
+            for (key in aPeCb) {
+                parentElement.on( key, aPeCb[key] ) ;
+            }
         }
 
         // Registra o manipulador de eventos para o botão
@@ -138,8 +141,6 @@ Registrando alguns padrões estabelecidos:
             // Verificar se há algo selecionado
             metadata.removeItem( metadata.data.selected );
         });
-
-
 
         // O input exibido no quadro para inserções de textos
         inputText = {
@@ -163,27 +164,44 @@ Registrando alguns padrões estabelecidos:
                 // Obtém uma string para ser usada como id e nome do elemento
                 var textId = buildId();
 
-                // Insere o input a criação do texto, atribuindo-o a variável
-                inputAtivo = $('<input/>').attr({
+                var attr = {
                     type: 'text',
                     id: 'id_input_text_' + textId,
                     class: settings.inputTextClass,
                     name: 'input_text_' + textId,
-                }).css({
+                };
+
+                var css = {
                     width: settings.inputTextWidth,
                     height: settings.inputTextHeight,
                     left: clickX,
                     position: 'absolute',
                     top: clickY
-                }).appendTo( o ).focus();
+                }
 
-                inputAtivo.keypress(function(e) {
+                // Insere o input a criação do texto, atribuindo-o a variável
+                inputAtivo = this._build( attr, css );
+
+                inputAtivo.on( "keypress", function(e) {
                     if(e.which == 13) {
                         layerText.make( this )
                     }
                 });
 
+                inputAtivo.appendTo( o ).focus();
+
                 return this;
+            },
+
+            _build: function( attr, css ){
+
+                attr = attr || {};
+                css = css || {};
+
+                // Insere o input a criação do texto, atribuindo-o a variável
+                inputAtivo = $('<input/>').attr(attr).css(css)
+
+                return inputAtivo;
             }
         }
 
@@ -195,11 +213,15 @@ Registrando alguns padrões estabelecidos:
 
                     if ( ( $(input) ).val() != "" ) {
 
+                        // Cria a div para o conteúdo
+                        var layerContent = $('<div/>').attr({
+                            class: 'layerContent',
+                        }).text( $(input).val() )
+
                         // Insere uma div
-                        var div = $('<div/>').attr({
-                            id: $(input).attr("id").replace("input", "div"),
-                            class: 'layer ' + settings.layerTextClass,
-                            name: $(input).attr("name").replace("input", "div")
+                        var layer = $('<div/>').attr({
+                            id: $(input).attr("id").replace("input", "layer"),
+                            class: 'layer ' + settings.layerTextClass
                         }).css({
                             width: $(input).width(),
                             height: $(input).height(),
@@ -207,19 +229,65 @@ Registrando alguns padrões estabelecidos:
                             position: 'absolute',
                             top: $(input).position().top,
                             display: 'table'
-                        }).text( $(input).val() )
+                        })
                         .draggable( {containment: "parent"} )
                         .resizable()
-                        .appendTo( $(input).parent() );
+                        .appendTo( parentElement );
+
+                        layerContent.appendTo( layer );
 
                         $(input).remove();
 
-                        metadata.addText( div );
-                        return div;
+                        // Registra dblclick para a layer, para edição
+                        layer.on("dblclick", function(){
+                            $( parentElement ).off( 'dblclick' );
+                            layerText.edit( layer );
+                        });
+
+                        metadata.addItem( layer );
+                        return layer;
                     }
                 }
 
+                $(input).remove();
                 return false;
+            },
+
+            edit: function( layer ){
+
+                var attr = {
+                    type: 'text',
+                    id: layer.attr( "id" ).replace("layer", "input"),
+                    class: settings.inputTextClass,
+                    name: layer.attr( "id" ).replace( "id_layer_text", "layer_text" ),
+                };
+
+                var css = {
+                    width: settings.inputTextWidth,
+                    height: settings.inputTextHeight,
+                    left: layer.position().left,
+                    position: 'absolute',
+                    top: layer.position().top
+                }
+
+                // Insere o input a criação do texto, atribuindo-o a variável
+                inputAtivo = inputText._build( attr, css );
+
+                layer.hide();
+
+                inputAtivo.val( layer.children( ".layerContent" ).text() );
+
+                // Se digitar enter
+                inputAtivo.on("keypress", function(e) {
+                    if(e.which == 13) {
+                        layer.children( ".layerContent" ).text( inputAtivo.val() );
+                        layer.show();
+                        metadata.editItem( layer )
+                        inputAtivo.remove();
+                    }
+                });
+
+                inputAtivo.appendTo( parentElement ).focus();
             }
         }
 
@@ -231,7 +299,7 @@ Registrando alguns padrões estabelecidos:
             data: { selected: [] },
 
             // Insere um novo texto no contexto
-            addText: function( text ){
+            addItem: function( text ){
 
                 if ( !( text.attr("id") in this.data ) ) {
 
@@ -263,6 +331,48 @@ Registrando alguns padrões estabelecidos:
                 this.addMenuItem( text );
             },
 
+            addMenuItem: function( text ){
+
+                // Insere o item no menu ( layersElement )
+                $( settings.layersElement ).append(
+                    $('<li/>', {
+                        'id': text.attr("id").replace("layer", "li"),
+                        'data-role': "list-divider"
+                    }).append(
+                        $('<a/>', {
+                            'href': '#',
+                            'data-transition': 'slide',
+                            'text': text.text()
+                        })
+                    ).on("click", function(){
+                        metadata.selectText( $(this).attr( "id" ) )
+                    })
+                );
+
+                // Registra
+                text.on("mousedown", function(){
+                    metadata.selectText( $(this).attr( "id" ) )
+                })
+
+                this.selectText( text.attr( "id" ) );
+            },
+
+            // Edita um item em metadata.data
+            editItem( layer ){
+                this.data[ layer.attr("id") ] = layer;
+                this.editMenuItem( layer );
+            },
+
+            // Edita um item das lista no menu de layers
+            editMenuItem( layer ){
+                $("#" + layer.attr("id").replace("layer", "li"))
+                .text( layer.text() );
+
+                // Registra novamente os callBacks no quadro
+                applyParentElementCallBacks();
+            },
+
+            // Remove  um item específico de metadata.data
             removeItem: function( itens ){
 
                 data = { selected: [] }
@@ -286,35 +396,9 @@ Registrando alguns padrões estabelecidos:
                 metadata.data = data;
             },
 
-            removeMenuItem: function(textId){
-                console.log( textId );
-                $( "#id_li_text_" + textId ).remove();
-            },
-
-            addMenuItem: function( text ){
-
-                // Insere o item no menu ( layersElement )
-                $( settings.layersElement ).append(
-                    $('<li/>', {
-                        'id': text.attr("id").replace("div", "li"),
-                        'data-role': "list-divider"
-                    }).append(
-                        $('<a/>', {
-                            'href': '#',
-                            'data-transition': 'slide',
-                            'text': text.text()
-                        })
-                    ).on("click", function(){
-                        metadata.selectText( $(this).attr( "id" ) )
-                    })
-                );
-
-                // Registra
-                text.on("mousedown", function(){
-                    metadata.selectText( $(this).attr( "id" ) )
-                })
-
-                this.selectText( text.attr( "id" ) );
+            removeMenuItem: function( id ){
+                $( "#id_li_text_" + id ).remove();
+                $( "#id_layer_text_" + id ).remove();
             },
 
             // Seleciona um texto existente no contexto
@@ -332,7 +416,7 @@ Registrando alguns padrões estabelecidos:
                 .addClass( "selected" );
 
                 // Marca no quadro o elemento selecionado
-                $( "#id_div_text_" + id ).addClass( "selected" );
+                $( "#id_layer_text_" + id ).addClass( "selected" );
             },
 
             // desseleciona uma layer específica
@@ -343,7 +427,7 @@ Registrando alguns padrões estabelecidos:
                 .removeClass( "selected" );
 
                 // no quadro...
-                $( "#id_div_text_"+ id )
+                $( "#id_layer_text_"+ id )
                 .removeClass( "selected" );
 
                 metadata.data.selected = []
@@ -359,7 +443,6 @@ Registrando alguns padrões estabelecidos:
 
                 return true;
             }
-
         }
 
         // var elementos = parentElement.children();
