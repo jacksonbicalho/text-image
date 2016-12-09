@@ -161,6 +161,8 @@ Registrando alguns padrões estabelecidos:
                 }
                 if(clickX < 10) clickX = 10;
 
+                if(clickY < 10) clickY = 10;
+
                 // Obtém uma string para ser usada como id e nome do elemento
                 var textId = buildId();
 
