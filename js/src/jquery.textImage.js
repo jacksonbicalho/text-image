@@ -239,7 +239,7 @@ Registrando alguns padrões estabelecidos:
                     // pois serão inseridas novamente
                     text.removeClass("ui-draggable ui-draggable-handle ui-resizable");
 
-                    this.data[ text.attr("id") ] = {
+                    this.data[ text.attr("id").replace("id_div_text_", "") ] = {
 
                         attrs: {
                             id: text.attr("id"),
@@ -265,18 +265,30 @@ Registrando alguns padrões estabelecidos:
 
             removeItem: function( itens ){
 
+                data = { selected: [] }
+
+                data.selected = metadata.data.selected;
+
                 itens.forEach( function(item){
 
                     $.each(metadata.data, function(i){
-                        if(someArray[i].name === 'Kristian') {
-                            someArray.splice(i,1);
-                            return false;
+
+                        if ( i != 'selected' ) {
+                            if ( i != item ) {
+                                data[ item ] = metadata.data[ item ];
+                            }
                         }
                     });
+                    $( "#id_div_text_" + item ).remove();
+                    metadata.removeMenuItem( item );
+                })
 
-                    alert( item );
-                } )
+                metadata.data = data;
+            },
 
+            removeMenuItem: function(textId){
+                console.log( textId );
+                $( "#id_li_text_" + textId ).remove();
             },
 
             addMenuItem: function( text ){
@@ -304,11 +316,6 @@ Registrando alguns padrões estabelecidos:
 
                 this.selectText( text.attr( "id" ) );
             },
-
-            removeMenuItem: function(textId){
-
-            },
-
 
             // Seleciona um texto existente no contexto
             selectText: function( textId ){
@@ -339,9 +346,7 @@ Registrando alguns padrões estabelecidos:
                 $( "#id_div_text_"+ id )
                 .removeClass( "selected" );
 
-                metadata.data.metadata.data.selected = $.grep(metadata.data.selected, function(val, index) {
-                    return val == id;
-                })
+                metadata.data.selected = []
 
             },
 
