@@ -161,7 +161,7 @@ Registrando alguns padrões estabelecidos:
                 }
                 if(clickX < 10) clickX = 10;
 
-                if(clickY < 10) clickY = 10;
+                if(clickY < 10) clickX = 10;
 
                 // Obtém uma string para ser usada como id e nome do elemento
                 var textId = buildId();
@@ -175,7 +175,7 @@ Registrando alguns padrões estabelecidos:
 
                 var css = {
                     width: settings.inputTextWidth,
-                    height: settings.inputTextHeight,
+                    // height: settings.inputTextHeight,
                     left: clickX,
                     position: 'absolute',
                     top: clickY
@@ -238,6 +238,13 @@ Registrando alguns padrões estabelecidos:
                         })
                         .draggable( {containment: "parent"} )
                         .resizable()
+
+resize: function(event, ui) {
+    $(this).css({left:'10px'}),
+    $(this).css({bottom:'10px'}),
+    $('#field').width($('#field').parent().width()-4);
+}
+
                         .appendTo( parentElement );
 
                         layerContent.appendTo( layer );
@@ -270,7 +277,7 @@ Registrando alguns padrões estabelecidos:
 
                 var css = {
                     width: settings.inputTextWidth,
-                    height: settings.inputTextHeight,
+                    // height: settings.inputTextHeight,
                     left: layer.position().left,
                     position: 'absolute',
                     top: layer.position().top

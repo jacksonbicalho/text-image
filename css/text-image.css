@@ -25,3 +25,18 @@ ul#text-image-layers li.selected{
 	font-weight: bold;
 	z-index: 1000;
 }
+
+.ui-resizable-handle{
+    display: none;
+}
+
+.layer:hover{
+    border: 1px outset #fff;
+    padding: 5px;
+    cursor: move;
+}
+
+.layer:hover > .ui-resizable-handle,
+.layer:active > .ui-resizable-handle {
+    display: block;
+}
