@@ -184,8 +184,12 @@ Registrando alguns padrões estabelecidos:
 
                 inputAtivo.on( "keypress", function(e) {
                     if(e.which == 13) {
-                        layerText.make( this )
+                        layerText.make( this );
                     }
+                });
+
+                inputAtivo.on(" blur", function(){
+                    layerText.make( this );
                 });
 
                 inputAtivo.appendTo( o ).focus();
@@ -280,14 +284,29 @@ Registrando alguns padrões estabelecidos:
                 // Se digitar enter
                 inputAtivo.on("keypress", function(e) {
                     if(e.which == 13) {
-                        layer.children( ".layerContent" ).text( inputAtivo.val() );
-                        layer.show();
-                        metadata.editItem( layer )
-                        inputAtivo.remove();
+                        returnLayer();
                     }
                 });
 
+                inputAtivo.on("blur", function(){
+                    returnLayer();
+                });
+
                 inputAtivo.appendTo( parentElement ).focus();
+
+                // Chamada quando retorna da edição para a layer
+                var returnLayer = function(){
+
+                    // Se o input estiver vazio exclui a layer
+                    if ( inputAtivo.val() == "" ) {
+                        metadata.removeItem( metadata.data.selected );
+                    }
+
+                    layer.children( ".layerContent" ).text( inputAtivo.val() );
+                    layer.show();
+                    metadata.editItem( layer )
+                    inputAtivo.remove();
+                }
             }
         }
 
