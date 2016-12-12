@@ -20,23 +20,21 @@ ul#text-image-layers li.selected{
 	background-color: red;
 }
 
+
 /* No quadro */
 .layer.selected{
-	font-weight: bold;
-	z-index: 1000;
-}
-
-.ui-resizable-handle{
-    display: none;
-}
-
-.layer:hover{
     border: 1px outset #fff;
-    padding: 5px;
     cursor: move;
 }
 
-.layer:hover > .ui-resizable-handle,
-.layer:active > .ui-resizable-handle {
+.layer.div-text div.ui-resizable-handle.ui-resizable-se.ui-icon.ui-icon-gripsmall-diagonal-se{
+    display: none;
+}
+.layer.div-text.selected div.ui-resizable-handle.ui-resizable-se.ui-icon.ui-icon-gripsmall-diagonal-se{
+    display: block;
+}
+
+.layer.selected:hover > .ui-resizable-handle,
+.layer.selected:active > .ui-resizable-handle {
     display: block;
 }

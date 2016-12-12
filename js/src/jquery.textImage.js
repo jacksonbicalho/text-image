@@ -237,13 +237,25 @@ Registrando alguns padrões estabelecidos:
                             display: 'table'
                         })
                         .draggable( {containment: "parent"} )
-                        .resizable()
+                        .resizable({
+                            start: function( event, ui ) {
+                                $( this ).addClass( "selected" );
+                            }
+                        })
 
-resize: function(event, ui) {
-    $(this).css({left:'10px'}),
-    $(this).css({bottom:'10px'}),
-    $('#field').width($('#field').parent().width()-4);
-}
+                        .hover(
+                          function() {
+                            $( this ).addClass( "selected" );
+                          }, function() {
+
+                            // Verifica se o elemento não está selecionado
+                            var isSelected = metadata.isSelected( layerText.getId( $( this ).attr("id") ) );
+                            if ( !isSelected ) {
+                                $( this ).removeClass( "selected" );
+                            }
+
+                          }
+                        )
 
                         .appendTo( parentElement );
 
@@ -316,6 +328,10 @@ resize: function(event, ui) {
                     metadata.editItem( layer )
                     inputAtivo.remove();
                 }
+            },
+
+            getId: function( layerId ){
+                return layerId.split("_").pop(-1);
             }
         }
 
@@ -372,17 +388,17 @@ resize: function(event, ui) {
                             'data-transition': 'slide',
                             'text': text.text()
                         })
-                    ).on("click", function(){
-                        metadata.selectText( $(this).attr( "id" ) )
+                    ).on("click", function( event ){
+                        metadata.selectText( $(this).attr( "id" ), event )
                     })
                 );
 
                 // Registra
-                text.on("mousedown", function(){
-                    metadata.selectText( $(this).attr( "id" ) )
+                text.on("mousedown", function( event ){
+                    metadata.selectText( $(this).attr( "id" ), event )
                 })
 
-                this.selectText( text.attr( "id" ) );
+                this.selectText( text.attr( "id" ), false );
             },
 
             // Edita um item em metadata.data
@@ -429,10 +445,25 @@ resize: function(event, ui) {
                 $( "#id_layer_text_" + id ).remove();
             },
 
-            // Seleciona um texto existente no contexto
-            selectText: function( textId ){
+            // Seleciona uma layer existente no contexto
+            selectText: function( layerId, event ){
 
-                var id = textId.split("_").pop(-1);
+                var id = layerText.getId( layerId );
+
+                // Se a tecla [ CTRL ] estiver pressionada, verifica se
+                // o elemento clicado está selecionado, se sim, desseleciona
+                if ( event != false ) {
+
+                    if ( event.ctrlKey ) {
+
+                        var  isSelected = metadata.isSelected( id );
+
+                        if ( isSelected ) {
+                            this.deselect( id );
+                            return true;
+                        }
+                    }
+                }
 
                 // Desseleciona qualquer outro que esteja selecionado
                 this.deselectAll();
@@ -470,6 +501,20 @@ resize: function(event, ui) {
                 }
 
                 return true;
+            },
+
+            // Verifica se um elemento em específico está selecionado
+            isSelected: function(id){
+
+                for (var i = metadata.data.selected.length - 1; i >= 0; i--) {
+
+                    if ( metadata.data.selected[i] == id ){
+                        return true;
+                    }
+
+                }
+
+                return false;
             }
         }
 
