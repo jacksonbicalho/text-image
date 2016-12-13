@@ -1,67 +1,3 @@
-/*
-Registrando alguns padrões estabelecidos:
-
-1 - Sobre os atributos nomeados dinâmicamente
-
-1.1 - de inputs
-
-    id:
-        O [ id ] atribuído ao input recebe a string  [ "id_input_text_" ]
-        concatenada com um identificador que na verdade será a
-        identificação de cada layer.
-
-        Exemplo:
-            id: "id_input_text_" +  buildId()
-            = "id_input_text_opjLWpZF"
-
-    class:
-        O atributo [ class ] rebebe a string [ "input_text " ] concatenada
-        com  [ settings.inputTextClass ].
-
-        Exemplo:
-            class: "input_text " + settings.inputTextClass
-            = "input_text classe1 classeN"
-
-    name:
-        O atributo [ name ] recebe a string [ "input_" ] concatenada com o
-        mesmo identicador usado na formação do [ id ]
-
-        Exemplo:
-            name: "input_" + buildId()
-            = "input_text_opjLWpZF"
-
-
-1.1 - de layers
-    As layers são o que envolve qualquer quanquer coisa dentro do quadro,
-    uma div.
-
-    id:
-        O atributo [ id ] de uma layer é formado pelo id do [ input ]
-        responsável pela criação da layer, sendo o nome [ input ] substituído
-        pelo nome layer.
-
-        Exemplo:
-            id: input.attr("id").replace("input", "layer")
-            = "id_layer_text_opjLWpZF"
-
-    class:
-        O atributo [ class ] rebebe a string [ "layer_text " ] concatenada
-        com [ settings.layerTextClass ].
-
-        Exemplo:
-            class: "layer_text " + settings.layerTextClass
-            = "layer_text classe5 classe10"
-
-    name:
-        O atributo [ name ] recebe a string [ "layer_" ] concatenada com o
-        mesmo identicador usado na formação do [ id ].
-        O mesmo que usar o mesmo nome do input substituindo o nome [ input ]
-        pelo nome [ layer ].
-
-        Exemplo:
-            name: input.attr("name").replace("input", "layer")
-            = "layer_text_opjLWpZF"
- */
 
 (function ( $ ) {
 
@@ -69,33 +5,28 @@ Registrando alguns padrões estabelecidos:
 
         var parentElement = this;
 
-        // Objeto para armazenar os dados de cada elemento inserido no quadro
-        // Ele além de armazenar todos os objetos inseridos no quadro, ele
-        // também manipula estes dados e gerencia a lista de exibição das layers
-        // no quadro
-        var metadata = metadata || {}
+        var data = data || {}
 
-        var inputText = inputText || {}
+        var inputLayer = inputLayer || {}
 
-        var layerText = layerText || {}
+        var layer = layer || {}
 
         // Veriáveis e métodos padrões
         var defaults = {
 
-            deselectAllButton: "#deselect-all",
+            layerClass: "div-text",
+
+            layerPanelBtnDeselectAll: "#deselect-all",
 
             layerPanelBtnDelete: "#btn-delete",
 
-            inputTextClass: "input-text",
+            textImagePanelElementLayerList: "#text-image-layers",
 
-            layerTextClass: "div-text",
+            inputLayerClass: "input-text",
 
-            layersElement: "#text-image-layers",
+            inputLayerWidth: 250,
 
-
-            inputTextWidth: 250,
-
-            inputTextHeight: 17,
+            inputLayerHeight: 17,
 
             // Registra os callbacks possíveis de serem reescritos na
             // configuração.
@@ -104,7 +35,7 @@ Registrando alguns padrões estabelecidos:
                 dblclick: function( e ) {
 
                     // Insere no quadro um input text para inserção de texto
-                    inputText.make( e, this );
+                    inputLayer.make( e, this );
                 }
             },
 
@@ -143,60 +74,54 @@ Registrando alguns padrões estabelecidos:
         });
 
         // O input exibido no quadro para inserções de textos
-        inputText = {
+        inputLayer = {
 
             // Cria no quadro um input para inserção de textos
-            make: function(e, o){
+            make: function( event ){
 
-                // Obtém a posição do clique no objeto parent ao clicado
-                var parentOffset = $( o ).parent().offset();
+                var parentOffset = parentElement.parent().offset();
 
-                // Calcula a posição do clique no quadro
-                var clickX = e.pageX - parentOffset.left;
-                var clickY = e.pageY - parentOffset.top;
+                var clickX = event.pageX - parentOffset.left;
+                var clickY = event.pageY - parentOffset.top;
 
-                // Impõe limites para a criação do input dentro do quadro
-                if ( (clickX + settings.inputTextWidth) > $( o ).width() ) {
-                    clickX = settings.inputTextWidth-10
+                if ( (clickX + settings.inputLayerWidth) > parentElement.width() ) {
+                    clickX = settings.inputLayerWidth-10
                 }
                 if(clickX < 10) clickX = 10;
 
                 if(clickY < 10) clickX = 10;
 
-                // Obtém uma string para ser usada como id e nome do elemento
-                var textId = buildId();
+                var textId = this.buildId();
 
                 var attr = {
                     type: 'text',
                     id: 'id_input_text_' + textId,
-                    class: settings.inputTextClass,
+                    class: settings.inputLayerClass,
                     name: 'input_text_' + textId,
                 };
 
                 var css = {
-                    width: settings.inputTextWidth,
-                    // height: settings.inputTextHeight,
+                    width: settings.inputLayerWidth,
                     left: clickX,
                     position: 'absolute',
                     top: clickY
                 }
 
-                // Insere o input a criação do texto, atribuindo-o a variável
                 inputAtivo = this._build( attr, css );
 
                 inputAtivo.on( "keypress", function(e) {
                     if(e.which == 13) {
-                        layerText.make( this );
+                        layer.make( this );
                     }
                 });
 
-                inputAtivo.on(" blur", function(){
-                    layerText.make( this );
+                inputAtivo.on("blur", function(){
+                    layer.make( this );
                 });
 
-                inputAtivo.appendTo( o ).focus();
+                inputAtivo.appendTo( parentElement ).focus();
 
-                return this;
+                return true;
             },
 
             _build: function( attr, css ){
@@ -208,10 +133,22 @@ Registrando alguns padrões estabelecidos:
                 inputAtivo = $('<input/>').attr(attr).css(css)
 
                 return inputAtivo;
-            }
-        }
+            },
 
-        layerText = {
+            // Retorna uma string para ser usada como ID dos elementos
+            buildId: function(){
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+                for( var i=0; i < 8; i++ )
+                    text += possible
+                        .charAt(Math.floor(Math.random() * possible.length));
+
+                return text;
+            },
+        },
+
+        layer = {
 
             make: function( input ){
 
@@ -219,15 +156,14 @@ Registrando alguns padrões estabelecidos:
 
                     if ( ( $(input) ).val() != "" ) {
 
-                        // Cria a div para o conteúdo
                         var layerContent = $('<div/>').attr({
                             class: 'layerContent',
                         }).text( $(input).val() )
 
                         // Insere uma div
-                        var layer = $('<div/>').attr({
+                        var layerDiv = $('<div/>').attr({
                             id: $(input).attr("id").replace("input", "layer"),
-                            class: 'layer ' + settings.layerTextClass
+                            class: 'layer ' + settings.layerClass
                         }).css({
                             width: $(input).width(),
                             height: $(input).height(),
@@ -244,33 +180,42 @@ Registrando alguns padrões estabelecidos:
                         })
 
                         .hover(
-                          function() {
-                            $( this ).addClass( "selected" );
-                          }, function() {
 
-                            // Verifica se o elemento não está selecionado
-                            var isSelected = metadata.isSelected( layerText.getId( $( this ).attr("id") ) );
-                            if ( !isSelected ) {
-                                $( this ).removeClass( "selected" );
+                            function() {
+                                $( this ).addClass( "selected" );
+                            },
+
+                            function() {
+
+                                var isSelected = data
+
+                                .isSelected( layer.getId( $( this ) ) );
+
+                                if ( !isSelected ) {
+                                    $( this ).removeClass( "selected" );
+                                }
                             }
-
-                          }
                         )
 
                         .appendTo( parentElement );
 
-                        layerContent.appendTo( layer );
+                        layerContent.appendTo( layerDiv );
 
                         $(input).remove();
 
-                        // Registra dblclick para a layer, para edição
-                        layer.on("dblclick", function(){
-                            $( parentElement ).off( 'dblclick' );
-                            layerText.edit( layer );
+                        // Registra click para a layer, (para seleção)
+                        layerDiv.on("click", function( e ){
+                            data.select( layer.getId( layerDiv ), e);
                         });
 
-                        metadata.addItem( layer );
-                        return layer;
+                        // Registra dblclick para a layer, (para edição)
+                        layerDiv.on("dblclick", function(){
+                            $( parentElement ).off( 'dblclick' );
+                            layer.edit( layerDiv );
+                        });
+
+                        data.add( layerDiv );
+                        return layerDiv;
                     }
                 }
 
@@ -289,29 +234,26 @@ Registrando alguns padrões estabelecidos:
 
                 var css = {
                     width: settings.inputTextWidth,
-                    // height: settings.inputTextHeight,
                     left: layer.position().left,
                     position: 'absolute',
                     top: layer.position().top
                 }
 
                 // Insere o input a criação do texto, atribuindo-o a variável
-                inputAtivo = inputText._build( attr, css );
+                inputAtivo = inputLayer._build( attr, css );
 
                 layer.hide();
 
                 inputAtivo.val( layer.children( ".layerContent" ).text() );
 
-                // Se digitar enter
+                // Se digitar enter ou perder o foco
                 inputAtivo.on("keypress", function(e) {
                     if(e.which == 13) {
                         returnLayer();
                     }
-                });
-
-                inputAtivo.on("blur", function(){
+                }).on(" blur", function(e){
                     returnLayer();
-                });
+                })
 
                 inputAtivo.appendTo( parentElement ).focus();
 
@@ -320,166 +262,142 @@ Registrando alguns padrões estabelecidos:
 
                     // Se o input estiver vazio exclui a layer
                     if ( inputAtivo.val() == "" ) {
-                        metadata.removeItem( metadata.data.selected );
+                        data.remove( layer );
                     }
 
                     layer.children( ".layerContent" ).text( inputAtivo.val() );
+
                     layer.show();
-                    metadata.editItem( layer )
+
+                    data.edit( layer )
+
                     inputAtivo.remove();
+
+                    applyParentElementCallBacks();
                 }
             },
 
-            getId: function( layerId ){
-                return layerId.split("_").pop(-1);
+            remove: function( layer ){
+                layer.remove();
+            },
+
+            getId: function( layer ){
+                return getId( layer );
             }
-        }
+        },
 
-        // Objeto que trata os dados contidos no quadro
-        metadata = {
+        // Armazena dados gerais de todos as layers inseridas no quadro
+        data = {
 
-            // Armazenagem de fato dos elementos, coma variável selected, que
-            // registra o elemento selecionado
-            data: { selected: [] },
+            // Armazena as layers inseridas no quadro
+            layers: [],
 
-            // Insere um novo texto no contexto
-            addItem: function( text ){
+            // Armazena as layers que estão selecionadas
+            selected: [],
 
-                if ( !( text.attr("id") in this.data ) ) {
+            // Adiciona um layer no objeto layers
+            add: function( _layer ){
+
+                var layerId = this.getId( _layer );
+
+                if ( !( layerId in this.layers ) ) {
 
                     // Remove as classes ui-draggable ui-draggable-handle ui-resizable
                     // pois serão inseridas novamente
-                    text.removeClass("ui-draggable ui-draggable-handle ui-resizable");
+                    _layer.removeClass("ui-draggable ui-draggable-handle ui-resizable");
 
-                    this.data[ text.attr("id").replace("id_div_text_", "") ] = {
-
-                        attrs: {
-                            id: text.attr("id"),
-                            class: text.attr("class"),
-                            name: text.attr("name")
-                        },
-
-                        css: {
-                            width: text.width(),
-                            height: text.height(),
-                            left: text.position().left,
-                            position: "absolute",
-                            top: text.position().top,
-                            display: 'table'
-                        },
-
-                        text: text.text()
-                    }
+                    this.layers.push( this.sanitize( _layer ) );
                 }
 
-                this.addMenuItem( text );
+                // Adiciona a layer a lista do painel
+                panelLayerList.add( _layer );
+
+                // Seleciona a layer inserida
+                this.select( layerId, null );
+
+                return data;
             },
 
-            addMenuItem: function( text ){
-
-                // Insere o item no menu ( layersElement )
-                $( settings.layersElement ).append(
-                    $('<li/>', {
-                        'id': text.attr("id").replace("layer", "li"),
-                        'data-role': "list-divider"
-                    }).append(
-                        $('<a/>', {
-                            'href': '#',
-                            'data-transition': 'slide',
-                            'text': text.text()
-                        })
-                    ).on("click", function( event ){
-                        metadata.selectText( $(this).attr( "id" ), event )
-                    })
-                );
-
-                // Registra
-                text.on("mousedown", function( event ){
-                    metadata.selectText( $(this).attr( "id" ), event )
-                })
-
-                this.selectText( text.attr( "id" ), false );
+            edit: function( _layer ){
+                this.layers[ this.getId( _layer ) ] = this.sanitize( _layer );
+                panelLayerList.edit( _layer )
             },
 
-            // Edita um item em metadata.data
-            editItem( layer ){
-                this.data[ layer.attr("id") ] = layer;
-                this.editMenuItem( layer );
+            remove: function( _layer ){
+
+                layerId = this.getId( _layer );
+
+                var _layers = [];
+
+                $.each(this.layers, function( index, value ) {
+                    if ( layerId != index ) {
+                        _layers[ index ] = value;
+                    }
+                });
+
+                this.layers = _layers;
+
+                panelLayerList.remove( _layer );
+
+                layer.remove( _layer );
             },
 
-            // Edita um item das lista no menu de layers
-            editMenuItem( layer ){
-                $("#" + layer.attr("id").replace("layer", "li"))
-                .text( layer.text() );
+            // Seleciona uma layer existente no quadro
+            select: function( layerId, event ){
 
-                // Registra novamente os callBacks no quadro
-                applyParentElementCallBacks();
-            },
-
-            // Remove  um item específico de metadata.data
-            removeItem: function( itens ){
-
-                data = { selected: [] }
-
-                data.selected = metadata.data.selected;
-
-                itens.forEach( function(item){
-
-                    $.each(metadata.data, function(i){
-
-                        if ( i != 'selected' ) {
-                            if ( i != item ) {
-                                data[ item ] = metadata.data[ item ];
-                            }
-                        }
-                    });
-                    $( "#id_div_text_" + item ).remove();
-                    metadata.removeMenuItem( item );
-                })
-
-                metadata.data = data;
-            },
-
-            removeMenuItem: function( id ){
-                $( "#id_li_text_" + id ).remove();
-                $( "#id_layer_text_" + id ).remove();
-            },
-
-            // Seleciona uma layer existente no contexto
-            selectText: function( layerId, event ){
-
-                var id = layerText.getId( layerId );
+                var multiple = false;
 
                 // Se a tecla [ CTRL ] estiver pressionada, verifica se
                 // o elemento clicado está selecionado, se sim, desseleciona
-                if ( event != false ) {
+                if ( event != null ) {
 
                     if ( event.ctrlKey ) {
 
-                        var  isSelected = metadata.isSelected( id );
+                        var  isSelected = data.isSelected( layerId );
 
                         if ( isSelected ) {
-                            this.deselect( id );
+                            this.deselect( layerId );
                             return true;
+                        }else{
+                            multiple = true;
                         }
                     }
                 }
 
-                // Desseleciona qualquer outro que esteja selecionado
-                this.deselectAll();
+                if ( !multiple ) {
 
-                this.data.selected.push(id);
+                    // Desseleciona qualquer outra layer que esteja selecionada
+                    this.deselectAll();
+                }
 
-                // Marca em ( layersElement ) o ítem selecionado
-                $( "#id_li_text_" + id )
+                this.selected.push( layerId );
+
+                // Marca em (textImagePanelElementLayerList) o ítem selecionado
+                $( "#id_li_text_" + layerId )
                 .addClass( "selected" );
 
                 // Marca no quadro o elemento selecionado
-                $( "#id_layer_text_" + id ).addClass( "selected" );
+                $( "#id_layer_text_" + layerId ).addClass( "selected" );
+
+                return true;
             },
 
-            // desseleciona uma layer específica
-            deselect: function(id){
+            // Verifica se uma layer está selecionada
+            isSelected: function( id ){
+
+                for (var i = this.selected.length - 1; i >= 0; i--) {
+
+                    if ( this.selected[i] == id ){
+                        return true;
+                    }
+
+                }
+
+                return false;
+            },
+
+            // Desseleciona uma layer específica
+            deselect: function( id ){
 
                 // no menu...
                 $( "#id_li_text_" + id )
@@ -489,51 +407,101 @@ Registrando alguns padrões estabelecidos:
                 $( "#id_layer_text_"+ id )
                 .removeClass( "selected" );
 
-                metadata.data.selected = []
+                var _selected = [];
+                for (var i = this.selected.length - 1; i >= 0; i--) {
 
+                    if ( this.selected[i] != id ){
+                        _selected.push( this.selected[i] );
+                    }
+                }
+
+                this.selected = _selected;
             },
 
             // Desmarca todos os elementos que estejam marcados
             deselectAll:  function(){
 
-                for (var i = metadata.data.selected.length - 1; i >= 0; i--) {
-                    metadata.deselect( metadata.data.selected[i] );
+                for (var i = this.selected.length - 1; i >= 0; i--) {
+                    this.deselect( this.selected[i] );
                 }
 
                 return true;
             },
 
-            // Verifica se um elemento em específico está selecionado
-            isSelected: function(id){
+            getId: function( layer ){
+                return getId( layer );
+            },
 
-                for (var i = metadata.data.selected.length - 1; i >= 0; i--) {
+            sanitize: function( layer ){
 
-                    if ( metadata.data.selected[i] == id ){
-                        return true;
-                    }
+                var layerId = this.getId( layer );
 
+                return {
+                    id: layerId,
+                    attrs: {
+                        id: layer.attr("id"),
+                        class: layer.attr("class")
+                    },
+
+                    css: {
+                        width: layer.width(),
+                        height: layer.height(),
+                        left: layer.position().left,
+                        position: "absolute",
+                        top: layer.position().top,
+                        display: 'table'
+                    },
+
+                    text: layer.text()
                 }
+            }
+        },
 
-                return false;
+        panelLayerList = {
+
+            add: function( layer ){
+
+                var id = this.getId( layer );
+
+                $( settings.textImagePanelElementLayerList ).append(
+                    $('<li/>', {
+                        'id': "id_li_text_" + id
+                    }).append(
+                        $('<a/>', {
+                            'href': '#',
+                            'text': layer.text()
+                        })
+                    ).on("mousedown", function( event ){
+                        data.select( id, event )
+                    })
+                );
+            },
+
+            edit: function( layer ){
+
+                var id = this.getId( layer );
+
+                $( "#" + "id_li_text_" + id ).text( layer.text() );
+
+                // applyParentElementCallBacks();
+            },
+
+            remove: function( layer ){
+
+                var id = this.getId( layer );
+
+                $("#id_li_text_" + id ).remove();
+            },
+
+            getId: function( layer ){
+                return getId( layer );
             }
         }
 
-        // var elementos = parentElement.children();
-        // elementos.each(function(e){
-        //     $(this).resizable();
-        //     // $(this).draggable( {containment: "parent"} );
-        // });
-
-        // Retorna uma string para ser usada como ID dos elementos
-        function buildId(){
-            var text = "";
-            var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-            for( var i=0; i < 8; i++ )
-                text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-            return text;
+        // Função universal para pegar o identificador de uma layer
+        // A layer deve ser passada como objeto JQuery $( layer )
+        function getId( layer ){
+            return layer.attr("id").split("_").pop(-1);
         }
     };
-
 }( jQuery ));
