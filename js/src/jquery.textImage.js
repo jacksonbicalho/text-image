@@ -69,8 +69,10 @@
         // (layerPanelBtnDelete)
         $( settings.layerPanelBtnDelete ).on('click', function(){
 
-            // Verificar se há algo selecionado
-            metadata.removeItem( metadata.data.selected );
+            $.each( data.selected , function( k, v ) {
+                data.remove( v );
+            });
+
         });
 
         // O input exibido no quadro para inserções de textos
