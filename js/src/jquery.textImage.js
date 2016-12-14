@@ -70,7 +70,7 @@
         $( settings.layerPanelBtnDelete ).on('click', function(){
 
             $.each( data.selected , function( k, v ) {
-                data.remove( v );
+                data.remove( $( "#id_layer_text_" + v ) );
             });
 
         });
@@ -217,6 +217,7 @@
                         });
 
                         data.add( layerDiv );
+
                         return layerDiv;
                     }
                 }
